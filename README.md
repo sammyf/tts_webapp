@@ -1,4 +1,4 @@
-##Just a small webapp to generate Text2Speech wav files using a specific voice from coqui's *tts* package.
+***Just a small webapp to generate Text2Speech wav files using a specific voice from coqui's *tts* package.***
 
 **Required:** python < 3.11 (as a tts package doesn't exist for python3.11 or 3.12)
 
