@@ -1,0 +1,5 @@
+Torch
+tts
+flask
+datetime
+flask-cors
