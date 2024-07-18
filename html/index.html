@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wave Form Generator</title>
+    <script src="https://unpkg.com/htmx.org@2.0.1" crossorigin="anonymous"></script>
+</head>
+
+    <body>
+    <form hx-post="http://localhost:21998/generate"
+          hx-trigger="submit"  hx-swap="innerHTML" hx-target="#audiourl" id="myform">
+        <textarea id="text-input" name="txt" style="width: 100%; height: 200px;"></textarea>
+        <br/>
+        <select id="voice-select" name="voice">
+<option value="p376">p376 (N)</option>
+<option value="p226">p226 (M)</option>
+<option value="p228">p228 (M)</option>
+<option value="p229">p229 (M)</option>
+<option value="p230">p230 (M)</option>
+<option value="p231">p231 (M)</option>
+<option value="p232">p232 (M)</option>
+<option value="p233">p233 (M)</option>
+<option value="p234">p234 (M)</option>
+<option value="p236">p236 (M)</option>
+<option value="p238">p238 (M)</option>
+<option value="p239">p239 (M)</option>
+<option value="p241">p241 (M)</option>
+<option value="p251">p251 (M)</option>
+<option value="p252">p252 (M)</option>
+<option value="p253">p253 (M)</option>
+<option value="p254">p254 (M)</option>
+<option value="p255">p255 (M)</option>
+<option value="p256">p256 (M)</option>
+<option value="p257">p257 (M)</option>
+<option value="p258">p258 (M)</option>
+<option value="p262">p262 (M)</option>
+<option value="p264">p264 (M)</option>
+<option value="p265">p265 (M)</option>
+<option value="p266">p266 (M)</option>
+<option value="p267">p267 (M)</option>
+<option value="p269">p269 (M)</option>
+<option value="p272">p272 (M)</option>
+<option value="p279">p279 (M)</option>
+<option value="p281">p281 (M)</option>
+<option value="p282">p282 (M)</option>
+<option value="p285">p285 (M)</option>
+<option value="p286">p286 (M)</option>
+<option value="p287">p287 (M)</option>
+<option value="p292">p292 (M)</option>
+<option value="p298">p298 (M)</option>
+<option value="p299">p299 (M)</option>
+<option value="p301">p301 (M)</option>
+<option value="p302">p302 (M)</option>
+<option value="p307">p307 (M)</option>
+<option value="p312">p312 (M)</option>
+<option value="p313">p313 (M)</option>
+<option value="p317">p317 (M)</option>
+<option value="p318">p318 (M)</option>
+<option value="p326">p326 (M)</option>
+<option value="p330">p330 (M)</option>
+<option value="p340">p340 (M)</option>
+<option value="p225">p225 (F)</option>
+<option value="p227">p227 (F)</option>
+<option value="p237">p237 (F)</option>
+<option value="p240">p240 (F)</option>
+<option value="p243">p243 (F)</option>
+<option value="p244">p244 (F)</option>
+<option value="p245">p245 (F)</option>
+<option value="p246">p246 (F)</option>
+<option value="p247">p247 (F)</option>
+<option value="p248">p248 (F)</option>
+<option value="p249">p249 (F)</option>
+<option value="p250">p250 (F)</option>
+<option value="p259">p259 (F)</option>
+<option value="p260">p260 (F)</option>
+<option value="p261">p261 (F)</option>
+<option value="p263">p263 (F)</option>
+<option value="p268">p268 (F)</option>
+<option value="p270">p270 (F)</option>
+<option value="p271">p271 (F)</option>
+<option value="p273">p273 (F)</option>
+<option value="p274">p274 (F)</option>
+<option value="p275">p275 (F)</option>
+<option value="p276">p276 (F)</option>
+<option value="p277">p277 (F)</option>
+<option value="p278">p278 (F)</option>
+<option value="p280">p280 (F)</option>
+<option value="p283">p283 (F)</option>
+<option value="p284">p284 (F)</option>
+<option value="p288">p288 (F)</option>
+<option value="p293">p293 (F)</option>
+<option value="p294">p294 (F)</option>
+<option value="p295">p295 (F)</option>
+<option value="p297">p297 (F)</option>
+<option value="p300">p300 (F)</option>
+<option value="p303">p303 (F)</option>
+<option value="p304">p304 (F)</option>
+<option value="p305">p305 (F)</option>
+<option value="p306">p306 (F)</option>
+<option value="p308">p308 (F)</option>
+<option value="p310">p310 (F)</option>
+<option value="p311">p311 (F)</option>
+<option value="p314">p314 (F)</option>
+<option value="p316">p316 (F)</option>
+<option value="p323">p323 (F)</option>
+<option value="p329">p329 (F)</option>
+<option value="p333">p333 (F)</option>
+<option value="p334">p334 (F)</option>
+<option value="p335">p335 (F)</option>
+<option value="p336">p336 (F)</option>
+<option value="p339">p339 (F)</option>
+<option value="p341">p341 (F)</option>
+<option value="p343">p343 (F)</option>
+<option value="p345">p345 (F)</option>
+<option value="p347">p347 (F)</option>
+<option value="p351">p351 (F)</option>
+<option value="p360">p360 (F)</option>
+<option value="p361">p361 (F)</option>
+<option value="p362">p362 (F)</option>
+<option value="p363">p363 (F)</option>
+<option value="p364">p364 (F)</option>
+<option value="p374">p374 (F)</option>
+
+        </select>
+        <br/>
+        <button type="submit">Generate</button>
+    </form>
+
+    <audio id="player" controls autoplay src="" type="audio/wav">
+            Your browser does not support the audio element.
+    </audio>
+
+    <a id="download-link" href="" target="_blank">Download Wave File</a>
+    <div id="audiourl" hx-trigger="change" hx-target="doit()"></div>
+    <script>
+
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        var newAudioUrl = document.getElementById("audiourl").innerText;
+        document.querySelector('#download-link').href = newAudioUrl;
+        document.getElementById("player").src = newAudioUrl;
+        document.getElementById("player").load();
+
+    })
+    </script>
+
+    </body>
+</html>
