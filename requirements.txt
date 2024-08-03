@@ -3,3 +3,4 @@ tts
 flask
 datetime
 flask-cors
+BeautifulSoup4
