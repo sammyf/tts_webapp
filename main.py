@@ -3,6 +3,7 @@ import requests
 import os
 import moztts
 import datetime
+import glob
 from flask_cors import CORS
 from bs4 import BeautifulSoup
 
@@ -66,6 +67,9 @@ def get_url_content(cache):
         # Get textual part of the page
         content = soup.get_text()
 
+        # Purge old voices
+        purge_voices()
+
         # Return the content
         return jsonify({"content": content})
     except Exception as e:
@@ -76,6 +80,17 @@ def log_request_info():
     print('Headers: %s', request.headers)
     print('Body: %s', request.get_data())
     print('--------------')
+
+def purge_voices():
+    # get all .wav files in the voices directory
+    files = glob.glob('voices/*.wav')
+
+    # sort files by date (descending)
+    files.sort(key=os.path.getmtime, reverse=True)
+
+    # delete all except the newest 10 files
+    for file in files[10:]:
+        os.remove(file)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=21998)
