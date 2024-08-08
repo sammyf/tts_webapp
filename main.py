@@ -1,7 +1,6 @@
 from flask import Flask, request, send_from_directory, send_file, jsonify
 import requests
 import os
-import moztts
 import datetime
 import glob
 import uuid
@@ -20,7 +19,6 @@ import time
 
 app = Flask(__name__)
 CORS(app)
-mozTTS = moztts.MozTTS()
 
 # Celery configuration
 # Celery configuration
@@ -48,37 +46,24 @@ def index():
 @app.route('/output/<fn>', methods=['GET', 'POST'])
 def return_wave_file(fn):
 
-    return send_file("voices/"+fn, mimetype='audio/x-wav')
+    return send_file("audio/ping.wav", mimetype='audio/x-wav')
 
 @app.route('/generate', methods=['POST'])
 def generate_wave_file():
-    text = request.form.get('txt')
-    voice = request.form.get('voice')
 
-    # get current date and time
-    now = datetime.datetime.now()
-    fname = now.strftime("%Y%m%d%H%M%S%f") + "_"+voice+".wav"
-
-    mozTTS.moztts(text,voice,"voices/"+fname)
-
-    return ('http://tts.cosmic-bandito.com/output/')+fname,200
+    return ('http://tts.cosmic-bandito.com/output/ping'),200
 
 
 @app.route('/companion/tts/output/<fn>', methods=['GET'])
 def return_wave_file_beezle(fn):
-
-    return send_file("voices/"+fn, mimetype='audio/x-wav')
+    return send_file("audio/ping.wav", mimetype='audio/x-wav')
 
 @app.route('/companion/tts/generate', methods=['POST'])
 def generate_wave_file_beezle():
     text = request.json.get('text')
     voice = request.json.get('voice')
 
-    # get current date and time
-    now = datetime.datetime.now()
-    fname = now.strftime("%Y%m%d%H%M%S%f") + "_"+voice+".wav"
-
-    mozTTS.moztts(text,voice,"voices/"+fname)
+    fname = "ping.wav"
 
     return jsonify(url=fname), 200
 
@@ -109,18 +94,6 @@ def get_url_content():
 @app.before_request
 def log_request_info():
     return
-
-def purge_voices():
-    # get all .wav files in the voices directory
-    files = glob.glob('voices/*.wav')
-
-    # sort files by date (descending)
-    files.sort(key=os.path.getmtime, reverse=True)
-
-    # delete all except the newest 10 files
-    for file in files[10:]:
-        os.remove(file)
-
 
 @celery.task(bind=True)
 def post_to_chat_api(self, uid, prompt):
