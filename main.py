@@ -16,6 +16,7 @@ import sqlite3
 
 import time
 
+LLAMA_URL="http://ollama.local:11111"
 
 app = Flask(__name__)
 CORS(app)
@@ -94,6 +95,16 @@ def get_url_content():
 @app.before_request
 def log_request_info():
     return
+
+@app.route('/companion/ps', methods=['POST'])
+def get_current_model():
+    response = requests.get( OLLAMA_URL+'/api/ps')
+    return response
+
+@app.route('/companion/models', methods=['POST'])
+def get_models():
+    response = requests.get( OLLAMA_URL+'/api/tags')
+    return response
 
 @celery.task(bind=True)
 def post_to_chat_api(self, uid, prompt):
