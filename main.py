@@ -16,7 +16,7 @@ import sqlite3
 
 import time
 
-OLLAMA_URL="http://bandito5:21434"
+OLLAMA_URL="http://ollama.local:11111"
 
 app = Flask(__name__)
 CORS(app)
@@ -96,12 +96,12 @@ def get_url_content():
 def log_request_info():
     return
 
-@app.route('/companion/ps', methods=['POST'])
+@app.route('/companion/ps', methods=['GET'])
 def get_current_model():
     response = requests.get( OLLAMA_URL+'/api/ps')
     return response
 
-@app.route('/companion/tags', methods=['POST'])
+@app.route('/companion/tags', methods=['GET'])
 def get_models():
     response = requests.get( OLLAMA_URL+'/api/tags')
     return response
