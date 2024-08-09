@@ -17,6 +17,7 @@ import sqlite3
 
 import time
 
+#OLLAMA_URL = "http://127.0.0.1:11434"
 OLLAMA_URL = "http://ollama.local:11111"
 app = Flask(__name__)
 CORS(app)
@@ -82,15 +83,15 @@ def generate_wave_file_beezle():
 
     return jsonify(url=fname), 200
 
-@app.route('/companion/ps', methods=['POST'])
+@app.route('/companion/ps', methods=['GET'])
 def get_current_model():
     response = requests.get( OLLAMA_URL+'/api/ps')
-    return response
+    return response.text,response.status_code
 
-@app.route('/companion/models', methods=['POST'])
+@app.route('/companion/tags', methods=['GET'])
 def get_models():
     response = requests.get( OLLAMA_URL+'/api/tags')
-    return response
+    return response.text,response.status_code
 
 @app.route('/companion/spider', methods=['POST'])
 def get_url_content():
