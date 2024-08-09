@@ -17,7 +17,7 @@ import sqlite3
 
 import time
 
-
+OLLAMA_URL = "http://ollama.local:11111"
 app = Flask(__name__)
 CORS(app)
 mozTTS = moztts.MozTTS()
@@ -82,6 +82,16 @@ def generate_wave_file_beezle():
 
     return jsonify(url=fname), 200
 
+@app.route('/companion/ps', methods=['POST'])
+def get_current_model():
+    response = requests.get( OLLAMA_URL+'/api/ps')
+    return response
+
+@app.route('/companion/models', methods=['POST'])
+def get_models():
+    response = requests.get( OLLAMA_URL+'/api/tags')
+    return response
+
 @app.route('/companion/spider', methods=['POST'])
 def get_url_content():
 
@@ -124,7 +134,7 @@ def purge_voices():
 
 @celery.task(bind=True)
 def post_to_chat_api(self, uid, prompt):
-    response = requests.post('http://127.0.0.1:11434/api/chat', json=prompt)
+    response = requests.post( OLLAMA_URL+'/api/chat', json=prompt)
     answer = response.text
 
     con = sqlite3.connect(DB_NAME)
