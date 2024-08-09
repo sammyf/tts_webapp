@@ -97,7 +97,7 @@ def log_request_info():
 
 @celery.task(bind=True)
 def post_to_chat_api(self, uid, prompt):
-    response = requests.post('http://127.0.0.1:11434/api/chat', json=prompt)
+    response = requests.post('http://ollama.local:11111/api/chat', json=prompt)
     answer = response.text
 
     con = sqlite3.connect(DB_NAME)
