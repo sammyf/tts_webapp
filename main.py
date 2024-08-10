@@ -99,12 +99,12 @@ def log_request_info():
 @app.route('/companion/ps', methods=['GET'])
 def get_current_model():
     response = requests.get( OLLAMA_URL+'/api/ps')
-    return response
+    return response.text,response.status_code
 
 @app.route('/companion/tags', methods=['GET'])
 def get_models():
     response = requests.get( OLLAMA_URL+'/api/tags')
-    return response
+    return response.text,response.status_code
 
 @celery.task(bind=True)
 def post_to_chat_api(self, uid, prompt):
