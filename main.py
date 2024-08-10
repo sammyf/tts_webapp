@@ -16,7 +16,7 @@ import sqlite3
 
 import time
 
-OLLAMA_URL="http://ollama.local:11111"
+OLLAMA_URL="https://beezle.cosmic-bandito.com"
 
 app = Flask(__name__)
 CORS(app)
