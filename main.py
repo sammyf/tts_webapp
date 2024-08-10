@@ -16,10 +16,19 @@ import sqlite3
 
 import time
 
-OLLAMA_URL="https://beezle.cosmic-bandito.com"
+BASIC_AUTH_USERNAME = '<USERNAME>'
+BASIC_AUTH_PW = '<PASSWORD>'
+PROTOCOL = 'https'
+OLLAMA_BASE_URL ="<URL>"
+
+auth = ""
+if BASIC_AUTH_USERNAME and BASIC_AUTH_PW:
+    auth = BASIC_AUTH_USERNAME + ':' + BASIC_AUTH_PW + '@'
+OLLAMA_URL = PROTOCOL + auth + OLLAMA_BASE_URL
+
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "https://beezle.cosmic-bandito.com"}})
 
 # Celery configuration
 # Celery configuration
@@ -104,6 +113,11 @@ def get_current_model():
 @app.route('/companion/tags', methods=['GET'])
 def get_models():
     response = requests.get( OLLAMA_URL+'/api/tags')
+    return response.text,response.status_code
+
+@app.route('/companion/unload', methods=['POST'])
+def unload():
+    response = requests.post( OLLAMA_URL+'/api/chat',request.data)
     return response.text,response.status_code
 
 @celery.task(bind=True)
