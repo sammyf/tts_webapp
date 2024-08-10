@@ -198,5 +198,10 @@ def get_response(uid):
         con.close()
         return rs.jsonify(), 200
 
+@app.route('/companion/unload', methods=['POST'])
+def unload():
+    response = requests.post( OLLAMA_URL+'/api/chat',request.data)
+    return response.text,response.status_code
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=21998)
