@@ -1,6 +1,7 @@
 from flask import Flask, request, send_from_directory, send_file, jsonify
 import requests
 import os
+import moztts
 import datetime
 import glob
 import uuid
@@ -13,22 +14,14 @@ import QueueObject
 import Queue
 from LLMAnswer import LLMAnswer
 import sqlite3
-
+from config import DB_NAME, OLLAMA_URL
+from celeryTask import post_to_chat_api
 import time
-
-BASIC_AUTH_USERNAME = '<USERNAME>'
-BASIC_AUTH_PW = '<PASSWORD>'
-PROTOCOL = 'https'
-OLLAMA_BASE_URL ="<URL>"
-
-auth = ""
-if BASIC_AUTH_USERNAME and BASIC_AUTH_PW:
-    auth = BASIC_AUTH_USERNAME + ':' + BASIC_AUTH_PW + '@'
-OLLAMA_URL = PROTOCOL + auth + OLLAMA_BASE_URL
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://beezle.cosmic-bandito.com"}})
+CORS(app)
+mozTTS = moztts.MozTTS()
 
 # Celery configuration
 # Celery configuration
@@ -39,7 +32,6 @@ app.config['result_backend'] = 'redis://localhost:6379/0'
 celery = Celery(app.name, broker=app.config['CELERY_broker_url'])
 celery.conf.update(app.config)
 
-DB_NAME='/tmp/beezleQueue.db'
 con=sqlite3.connect(DB_NAME)
 cur=con.cursor()
 
@@ -56,7 +48,7 @@ def index():
 @app.route('/output/<fn>', methods=['GET', 'POST'])
 def return_wave_file(fn):
 
-    return send_file("audio/ping.wav", mimetype='audio/x-wav')
+    return send_file("voices/"+fn, mimetype='audio/x-wav')
 
 @app.route('/generate', methods=['POST'])
 def generate_wave_file():
@@ -120,23 +112,18 @@ def unload():
     response = requests.post( OLLAMA_URL+'/api/chat',request.data)
     return response.text,response.status_code
 
-@celery.task(bind=True)
-def post_to_chat_api(self, uid, prompt):
-    response = requests.post( OLLAMA_URL+'/api/chat', json=prompt)
-    answer = response.text
 
-    con = sqlite3.connect(DB_NAME)
-    cur = con.cursor()
+def purge_voices():
+    # get all .wav files in the voices directory
+    files = glob.glob('voices/*.wav')
 
-    if response.status_code == 200:
-        res = cur.execute('SELECT * FROM queue WHERE uuid = ?', (uid,))
-        res.fetchone()
-        if res != None:
-            cur.execute('UPDATE queue SET answer=? WHERE uuid = ?', (answer, uid,))
-    else:
-        cur.execute('UPDATE queue SET answer=? WHERE uuid = ?', (answer, uid,))
-    con.commit()
-    con.close()
+    # sort files by date (descending)
+    files.sort(key=os.path.getmtime, reverse=True)
+
+    # delete all except the newest 10 files
+    for file in files[10:]:
+        os.remove(file)
+
 
 @app.route('/companion/request', methods=['POST'])
 def queue_request():
@@ -184,6 +171,11 @@ def get_response(uid):
         rs.model = "not found"
         con.close()
         return rs.jsonify(), 200
+
+@app.route('/companion/unload', methods=['POST'])
+def unload():
+    response = requests.post( OLLAMA_URL+'/api/chat',json= request.get_json())
+    return response.text,response.status_code
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=21998)
