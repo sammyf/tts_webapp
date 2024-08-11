@@ -6,7 +6,7 @@ from celery import Celery
 
 app = Celery('tts', broker= 'redis://localhost:6379/0')
 @app.task
-def post_to_chat_api(self, uid, prompt):
+def post_to_chat_api(uid, prompt):
     response = requests.post(OLLAMA_URL + '/api/chat', json=prompt)
     answer = response.text
 
@@ -23,7 +23,7 @@ def post_to_chat_api(self, uid, prompt):
     con.commit()
     con.close()
 
-def debug(self, uid):
+def debug(uid):
     def get_current_model():
         response = requests.get(OLLAMA_URL + '/api/ps')
         return response.text, response.status_code
