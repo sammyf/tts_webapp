@@ -15,12 +15,9 @@ from LLMAnswer import LLMAnswer
 import sqlite3
 from config import DB_NAME, OLLAMA_URL
 import time
+from celeryTask import post_to_chat_api
 
 app = Flask(__name__)
-
-# Celery configuration
-app.config['CELERY_broker_url'] = 'redis://localhost:6379/0'
-app.config['result_backend'] = 'redis://localhost:6379/0'
 
 # Initialise Celery
 celery = Celery(app.name, broker=app.config['CELERY_broker_url'])
@@ -37,23 +34,6 @@ con.commit()
 con.close()
 
 
-@celery.task(bind=True)
-def post_to_chat_api(self, uid, prompt):
-    response = requests.post(OLLAMA_URL + '/api/chat', json=prompt)
-    answer = response.text
-
-    con = sqlite3.connect(DB_NAME)
-    cur = con.cursor()
-
-    if response.status_code == 200:
-        res = cur.execute('SELECT * FROM queue WHERE uuid = ?', (uid,))
-        res.fetchone()
-        if res is not None:
-            cur.execute('UPDATE queue SET answer=? WHERE uuid = ?', (answer, uid,))
-    else:
-        cur.execute('UPDATE queue SET answer=? WHERE uuid = ?', (answer, uid,))
-    con.commit()
-    con.close()
 
 
 @app.route('/')
