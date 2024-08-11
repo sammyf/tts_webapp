@@ -21,7 +21,6 @@ import time
 
 app = Flask(__name__)
 CORS(app)
-mozTTS = moztts.MozTTS()
 
 # Celery configuration
 # Celery configuration
