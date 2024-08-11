@@ -1,7 +1,6 @@
 from flask import Flask, request, send_from_directory, send_file, jsonify
 import requests
 import os
-import moztts
 import datetime
 import glob
 import uuid
