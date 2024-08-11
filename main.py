@@ -14,11 +14,10 @@ import QueueObject
 import Queue
 from LLMAnswer import LLMAnswer
 import sqlite3
-
+from config import DB_NAME, OLLAMA_URL
+from celeryTask import post_to_chat_api
 import time
 
-#OLLAMA_URL = "http://127.0.0.1:11434"
-OLLAMA_URL = "https://beezle.cosmic-bandito.com"
 app = Flask(__name__)
 CORS(app)
 mozTTS = moztts.MozTTS()
@@ -27,12 +26,10 @@ mozTTS = moztts.MozTTS()
 # Celery configuration
 app.config['CELERY_broker_url'] = 'redis://localhost:6379/0'
 app.config['result_backend'] = 'redis://localhost:6379/0'
-
 # Initialise Celery
 celery = Celery(app.name, broker=app.config['CELERY_broker_url'])
 celery.conf.update(app.config)
 
-DB_NAME='/tmp/beezleQueue.db'
 con=sqlite3.connect(DB_NAME)
 cur=con.cursor()
 
@@ -75,6 +72,7 @@ def generate_wave_file_beezle():
     text = request.json.get('text')
     voice = request.json.get('voice')
 
+    purge_voices()
     # get current date and time
     now = datetime.datetime.now()
     fname = now.strftime("%Y%m%d%H%M%S%f") + "_"+voice+".wav"
@@ -133,23 +131,7 @@ def purge_voices():
         os.remove(file)
 
 
-@celery.task(bind=True)
-def post_to_chat_api(self, uid, prompt):
-    response = requests.post( OLLAMA_URL+'/api/chat', json=prompt)
-    answer = response.text
 
-    con = sqlite3.connect(DB_NAME)
-    cur = con.cursor()
-
-    if response.status_code == 200:
-        res = cur.execute('SELECT * FROM queue WHERE uuid = ?', (uid,))
-        res.fetchone()
-        if res != None:
-            cur.execute('UPDATE queue SET answer=? WHERE uuid = ?', (answer, uid,))
-    else:
-        cur.execute('UPDATE queue SET answer=? WHERE uuid = ?', (answer, uid,))
-    con.commit()
-    con.close()
 
 @app.route('/companion/request', methods=['POST'])
 def queue_request():
@@ -200,7 +182,7 @@ def get_response(uid):
 
 @app.route('/companion/unload', methods=['POST'])
 def unload():
-    response = requests.post( OLLAMA_URL+'/api/chat',request.data)
+    response = requests.post( OLLAMA_URL+'/api/chat',json= request.get_json())
     return response.text,response.status_code
 
 if __name__ == '__main__':
