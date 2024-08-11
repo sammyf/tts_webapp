@@ -19,8 +19,6 @@ from celeryTask import post_to_chat_api
 import time
 
 app = Flask(__name__)
-CORS(app)
-mozTTS = moztts.MozTTS()
 
 # Celery configuration
 # Celery configuration
@@ -30,6 +28,10 @@ app.config['result_backend'] = 'redis://localhost:6379/0'
 celery = Celery(app.name, broker=app.config['CELERY_broker_url'])
 celery.conf.update(app.config)
 
+CORS(app)
+
+mozTTS = moztts.MozTTS()
+
 con=sqlite3.connect(DB_NAME)
 cur=con.cursor()
 
@@ -37,6 +39,25 @@ cur=con.cursor()
 cur.execute('CREATE TABLE IF NOT EXISTS  "queue" (	"uuid"	TEXT NOT NULL UNIQUE, 	"prompt"	TEXT,	"answer"	TEXT,	PRIMARY KEY("uuid"))')
 con.commit()
 con.close()
+
+
+@celery.task(bind=True)
+def post_to_chat_api(self, uid, prompt):
+    response = requests.post( OLLAMA_URL+'/api/chat', json=prompt)
+    answer = response.text
+
+    con = sqlite3.connect(DB_NAME)
+    cur = con.cursor()
+
+    if response.status_code == 200:
+        res = cur.execute('SELECT * FROM queue WHERE uuid = ?', (uid,))
+        res.fetchone()
+        if res is not None:
+            cur.execute('UPDATE queue SET answer=? WHERE uuid = ?', (answer, uid,))
+    else:
+        cur.execute('UPDATE queue SET answer=? WHERE uuid = ?', (answer, uid,))
+    con.commit()
+    con.close()
 
 @app.route('/')
 def index():
