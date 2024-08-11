@@ -22,3 +22,8 @@ def post_to_chat_api(self, uid, prompt):
         cur.execute('UPDATE queue SET answer=? WHERE uuid = ?', (answer, uid,))
     con.commit()
     con.close()
+
+def debug(self, uid):
+    def get_current_model():
+        response = requests.get(OLLAMA_URL + '/api/ps')
+        return response.text, response.status_code
