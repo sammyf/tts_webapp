@@ -4,8 +4,6 @@ from config import DB_NAME, OLLAMA_URL
 import requests
 from celery import Celery
 
-from main import celery
-
 app = Celery('tts', broker= 'redis://localhost:6379/0')
 @app.task
 def post_to_chat_api(self, uid, prompt):
