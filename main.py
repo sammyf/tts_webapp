@@ -123,13 +123,6 @@ def get_models():
     response = requests.get(OLLAMA_URL + '/api/tags')
     return response.text, response.status_code
 
-
-@app.route('/companion/unload', methods=['POST'])
-def unload():
-    response = requests.post(OLLAMA_URL + '/api/chat', request.data)
-    return response.text, response.status_code
-
-
 def purge_voices():
     # get all .wav files in the voices directory
     files = glob.glob('voices/*.wav')
