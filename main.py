@@ -15,13 +15,9 @@ from LLMAnswer import LLMAnswer
 import sqlite3
 from config import DB_NAME, OLLAMA_URL
 import time
-from celeryTask import post_to_chat_api
 
 app = Flask(__name__)
 
-# Initialise Celery
-celery = Celery(app.name, broker=app.config['CELERY_broker_url'])
-celery.conf.update(app.config)
 CORS(app)
 
 con = sqlite3.connect(DB_NAME)
@@ -32,8 +28,6 @@ cur.execute(
     'CREATE TABLE IF NOT EXISTS  "queue" (	"uuid"	TEXT NOT NULL UNIQUE, 	"prompt"	TEXT,	"answer"	TEXT,	PRIMARY KEY("uuid"))')
 con.commit()
 con.close()
-
-
 
 
 @app.route('/')
@@ -113,24 +107,6 @@ def purge_voices():
     # delete all except the newest 10 files
     for file in files[10:]:
         os.remove(file)
-
-
-@app.route('/companion/request', methods=['POST'])
-def queue_request():
-    prompt = request.get_json()
-    raw = str(json.dumps(prompt))
-
-    uid = str(uuid.uuid4())
-
-    con = sqlite3.connect(DB_NAME)
-    cur = con.cursor()
-    cur.execute("INSERT INTO queue ( uuid, prompt, answer ) VALUES ( ?, ?, '')", (uid, raw))
-    con.commit()
-
-    post_to_chat_api.apply_async(args=[uid, prompt])
-
-    print("\n\nUUID : ", uid, "\n\n")
-    return jsonify({"uuid": uid}), 200
 
 
 StillProcessingMsg = LLMAnswer()
