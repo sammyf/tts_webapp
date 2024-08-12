@@ -4,6 +4,4 @@ flask
 datetime
 flask-cors
 BeautifulSoup4
-celery[redis]
 requests
-redis
