@@ -3,17 +3,9 @@ import requests
 import os
 import datetime
 import glob
-import uuid
-from celery import Celery
 import json
-import redis
 from flask_cors import CORS
 from bs4 import BeautifulSoup
-import QueueObject
-import Queue
-from LLMAnswer import LLMAnswer
-import sqlite3
-from config import DB_NAME, OLLAMA_URL
 import time
 
 app = Flask(__name__)
@@ -85,18 +77,6 @@ def get_url_content():
 def log_request_info():
     return
 
-
-@app.route('/companion/ps', methods=['GET'])
-def get_current_model():
-    response = requests.get(OLLAMA_URL + '/api/ps')
-    return response.text, response.status_code
-
-
-@app.route('/companion/tags', methods=['GET'])
-def get_models():
-    response = requests.get(OLLAMA_URL + '/api/tags')
-    return response.text, response.status_code
-
 def purge_voices():
     # get all .wav files in the voices directory
     files = glob.glob('voices/*.wav')
@@ -107,45 +87,6 @@ def purge_voices():
     # delete all except the newest 10 files
     for file in files[10:]:
         os.remove(file)
-
-
-StillProcessingMsg = LLMAnswer()
-StillProcessingMsg.model = "still processing"
-
-
-@app.route('/companion/response/<uid>', methods=['GET'])
-def get_response(uid):
-    con = sqlite3.connect(DB_NAME)
-    cur = con.cursor()
-
-    res = cur.execute('SELECT answer FROM queue WHERE uuid = ?', (uid,))
-    sqlAnswer = res.fetchone()
-    if sqlAnswer != None:
-        if (sqlAnswer == ''):
-            con.close()
-            return StillProcessingMsg.jsonify(), 200
-        try:
-            answer = json.loads(sqlAnswer[0])
-        except Exception as e:
-            con.close()
-            return StillProcessingMsg.jsonify(), 200
-
-        cur.execute('DElETE FROM queue WHERE uuid = ?', (uid,))
-        con.commit()
-        con.close()
-        return answer, 200
-    else:
-        rs = LLMAnswer()
-        rs.model = "not found"
-        con.close()
-        return rs.jsonify(), 200
-
-
-@app.route('/companion/unload', methods=['POST'])
-def unload():
-    response = requests.post(OLLAMA_URL + '/api/chat', json=request.get_json())
-    return response.text, response.status_code
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=21998)
