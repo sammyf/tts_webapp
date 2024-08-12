@@ -74,16 +74,6 @@ def generate_wave_file_beezle():
 
     return jsonify(url=fname), 200
 
-@app.route('/companion/ps', methods=['GET'])
-def get_current_model():
-    response = requests.get( OLLAMA_URL+'/api/ps')
-    return response.text,response.status_code
-
-@app.route('/companion/tags', methods=['GET'])
-def get_models():
-    response = requests.get( OLLAMA_URL+'/api/tags')
-    return response.text,response.status_code
-
 @app.route('/companion/spider', methods=['POST'])
 def get_url_content():
 
@@ -123,40 +113,6 @@ def purge_voices():
     for file in files[10:]:
         os.remove(file)
 
-StillProcessingMsg = LLMAnswer()
-StillProcessingMsg.model = "still processing"
-
-@app.route('/companion/response/<uid>', methods=['GET'])
-def get_response(uid):
-    con = sqlite3.connect(DB_NAME)
-    cur = con.cursor()
-
-    res = cur.execute('SELECT answer FROM queue WHERE uuid = ?', (uid,))
-    sqlAnswer = res.fetchone()
-    if sqlAnswer != None:
-        if(sqlAnswer == ''):
-            con.close()
-            return StillProcessingMsg.jsonify(), 200
-        try:
-            answer = json.loads(sqlAnswer[0])
-        except Exception as e:
-            con.close()
-            return StillProcessingMsg.jsonify(), 200
-
-        cur.execute('DElETE FROM queue WHERE uuid = ?', (uid,))
-        con.commit()
-        con.close()
-        return answer, 200
-    else:
-        rs = LLMAnswer()
-        rs.model = "not found"
-        con.close()
-        return rs.jsonify(), 200
-
-@app.route('/companion/unload', methods=['POST'])
-def unload():
-    response = requests.post( OLLAMA_URL+'/api/chat',json= request.get_json())
-    return response.text,response.status_code
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=21998)
