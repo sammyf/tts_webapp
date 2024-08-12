@@ -42,12 +42,12 @@ def return_wave_file(fn):
 
 @app.route('/generate', methods=['POST'])
 def generate_wave_file():
-    return ('http://tts.cosmic-bandito.com/output/ping'), 200
+    return ('http://tts.cosmic-bandito.com/assets/ping'), 200
 
 
 @app.route('/companion/tts/output/<fn>', methods=['GET'])
 def return_wave_file_beezle(fn):
-    return send_file("audio/ping.wav", mimetype='audio/x-wav')
+    return send_file("assets/ping.wav", mimetype='audio/x-wav')
 
 
 @app.route('/companion/tts/generate', methods=['POST'])
