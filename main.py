@@ -15,18 +15,9 @@ import Queue
 from LLMAnswer import LLMAnswer
 import sqlite3
 from config import DB_NAME, OLLAMA_URL
-from celeryTask import post_to_chat_api
 import time
 
 app = Flask(__name__)
-
-# Celery configuration
-# Celery configuration
-app.config['CELERY_broker_url'] = 'redis://localhost:6379/0'
-app.config['result_backend'] = 'redis://localhost:6379/0'
-# Initialise Celery
-celery = Celery(app.name, broker=app.config['CELERY_broker_url'])
-celery.conf.update(app.config)
 
 CORS(app)
 
@@ -39,25 +30,6 @@ cur=con.cursor()
 cur.execute('CREATE TABLE IF NOT EXISTS  "queue" (	"uuid"	TEXT NOT NULL UNIQUE, 	"prompt"	TEXT,	"answer"	TEXT,	PRIMARY KEY("uuid"))')
 con.commit()
 con.close()
-
-
-@celery.task(bind=True)
-def post_to_chat_api(self, uid, prompt):
-    response = requests.post( OLLAMA_URL+'/api/chat', json=prompt)
-    answer = response.text
-
-    con = sqlite3.connect(DB_NAME)
-    cur = con.cursor()
-
-    if response.status_code == 200:
-        res = cur.execute('SELECT * FROM queue WHERE uuid = ?', (uid,))
-        res.fetchone()
-        if res is not None:
-            cur.execute('UPDATE queue SET answer=? WHERE uuid = ?', (answer, uid,))
-    else:
-        cur.execute('UPDATE queue SET answer=? WHERE uuid = ?', (answer, uid,))
-    con.commit()
-    con.close()
 
 @app.route('/')
 def index():
@@ -150,26 +122,6 @@ def purge_voices():
     # delete all except the newest 10 files
     for file in files[10:]:
         os.remove(file)
-
-
-
-
-@app.route('/companion/request', methods=['POST'])
-def queue_request():
-    prompt = request.get_json()
-    raw = str(json.dumps(prompt))
-
-    uid = str(uuid.uuid4())
-
-    con = sqlite3.connect(DB_NAME)
-    cur = con.cursor()
-    cur.execute("INSERT INTO queue ( uuid, prompt, answer ) VALUES ( ?, ?, '')", (uid,raw))
-    con.commit()
-
-    post_to_chat_api.apply_async(args=[uid, prompt])
-
-    print("\n\nUUID : ",uid,"\n\n")
-    return jsonify({"uuid": uid}), 200
 
 StillProcessingMsg = LLMAnswer()
 StillProcessingMsg.model = "still processing"
