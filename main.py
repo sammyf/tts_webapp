@@ -12,15 +12,6 @@ app = Flask(__name__)
 
 CORS(app)
 
-con = sqlite3.connect(DB_NAME)
-cur = con.cursor()
-
-# cur.execute("DROP TABLE IF EXISTS queue")
-cur.execute(
-    'CREATE TABLE IF NOT EXISTS  "queue" (	"uuid"	TEXT NOT NULL UNIQUE, 	"prompt"	TEXT,	"answer"	TEXT,	PRIMARY KEY("uuid"))')
-con.commit()
-con.close()
-
 
 @app.route('/')
 def index():
