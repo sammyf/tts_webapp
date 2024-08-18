@@ -4,17 +4,10 @@ import os
 import moztts
 import datetime
 import glob
-import uuid
-from celery import Celery
 import json
-import redis
+
 from flask_cors import CORS
 from bs4 import BeautifulSoup
-import QueueObject
-import Queue
-from LLMAnswer import LLMAnswer
-import sqlite3
-from config import DB_NAME, OLLAMA_URL
 import time
 
 app = Flask(__name__)
@@ -22,14 +15,6 @@ app = Flask(__name__)
 CORS(app)
 
 mozTTS = moztts.MozTTS()
-
-con=sqlite3.connect(DB_NAME)
-cur=con.cursor()
-
-# cur.execute("DROP TABLE IF EXISTS queue")
-cur.execute('CREATE TABLE IF NOT EXISTS  "queue" (	"uuid"	TEXT NOT NULL UNIQUE, 	"prompt"	TEXT,	"answer"	TEXT,	PRIMARY KEY("uuid"))')
-con.commit()
-con.close()
 
 @app.route('/')
 def index():
@@ -76,7 +61,6 @@ def generate_wave_file_beezle():
 
 @app.route('/companion/spider', methods=['POST'])
 def get_url_content():
-
 
     url = request.json.get('url')
 
