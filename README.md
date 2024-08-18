@@ -10,7 +10,7 @@ __Installation on GNU/Linux :__
 
 * create a virtual environment with
 
-`python10 -m venv .venv`
+`python3.10 -m venv .venv`
 
 * activate it with
 
