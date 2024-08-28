@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 from flask import Flask, request, send_from_directory, send_file, jsonify
 import requests
 import os
@@ -46,22 +48,23 @@ def generate_wave_file_beezle():
 @app.route('/companion/spider', methods=['POST'])
 def get_url_content():
     url = request.json.get('url')
-
     print(url + " <- URL found!")
     try:
         # Make a GET request to the url
         response = requests.get(url)
-
         returnCode = response.status_code
         # Parse the web page content
         soup = BeautifulSoup(response.text, 'html.parser')
+        linkList = ""
+        for a in soup.findAll('a'):
+            link = urljoin(url, a.get('href'))
+            a.string = " "+a.text + "(href: '" + link + "') "
         # Get textual part of the page
         content = soup.get_text()
-
         # Return the content
         return jsonify({"content": content, "returnCode": returnCode}), 200
     except Exception as e:
-        return jsonify({"content": "error :" + str(e), "returnCode": 500}), 400
+        return jsonify({"content": "error :" + str(e), "returnCode": 500}), 200
 
 
 @app.before_request
