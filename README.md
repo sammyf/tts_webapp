@@ -1,16 +1,22 @@
-***Just a small webapp to generate Text2Speech wav files using a specific voice from coqui's *tts* package.***
+## TTS Webapp
 
-This app is also used as a companion for another GUI I wrote to help it access the internet and, of course, to generate TTS Files.
+This branch of tts_app app is used as a companion for ollamaui ( https://github.com/sammyf/ollamaui ) to help it access and understand the internet.
+It doesn't require the TTS package and will only return a ping instead of spoken words!
 
-**Required:** python < 3.11 (as a tts package doesn't exist for python3.11 or 3.12)
+**IMPORTANT** : if you need this for ollamaui and want the TTS output, then clone the branch `master`  
 
-__Installation on GNU/Linux :__
+### Requirements
+* python
+
+### Installation
+
+**GNU/Linux :**
 
 * clone this repo, change the URLs and ports in main.py and html/index.html to match your requirements.
 
 * create a virtual environment with
 
-`python10 -m venv .venv`
+`python -m venv .venv`
 
 * activate it with
 
@@ -26,11 +32,10 @@ __Installation on GNU/Linux :__
 
 
 
-__Installation on Windows :__
+**Windows** 
 
 probably similar to GNU/Linux. No idea really as I don't have a Microsoft Windows partition anymore.
 
-
-__Installation on Mac :__
+**MacOS**
 
 See Windows, except that I never had a Mac nor an Apple device.
