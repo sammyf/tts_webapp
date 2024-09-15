@@ -104,10 +104,13 @@ def purge_voices():
 
 @app.route('/companion/embed_memory', methods=['POST'])
 def embed_memories():
+    print("embedding ...")
     summary = request.json.get('summary')
     uid = request.json.get('uid')
     memid = request.json.get('memid')
 
+    print(uid)
+    print(memid)
     client = chromadb.PersistentClient(path="/mnt/chromadb/beezle_"+str(uid)+".db")
     collection = client.get_collection(name='memories')
     response = ollama.embeddings(model=EMBED_MODEL, prompt=summary)
@@ -116,6 +119,7 @@ def embed_memories():
         id=[memid],
         embeddings=[embedding]
     )
+
 
 @app.route('/companion/retrieve_memory', methods=['POST'])
 def retrieve_memories():
