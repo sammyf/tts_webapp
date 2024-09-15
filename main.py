@@ -1,3 +1,4 @@
+from http.client import responses
 from urllib.parse import urljoin
 
 from flask import Flask, request, send_from_directory, send_file, jsonify
@@ -7,6 +8,8 @@ import moztts
 import datetime
 import glob
 import json
+import ollama
+import chromadb
 
 from flask_cors import CORS
 from bs4 import BeautifulSoup
@@ -18,6 +21,7 @@ CORS(app)
 
 mozTTS = moztts.MozTTS()
 
+EMBED_MODEL = "mxbai-embed-large"
 @app.route('/')
 def index():
     return send_from_directory('html', 'index.html')
@@ -98,6 +102,38 @@ def purge_voices():
     for file in files[10:]:
         os.remove(file)
 
+@app.route('/companion/embed_memory', methods=['POST'])
+def embed_memories():
+    summary = request.json.get('summary')
+    uid = request.json.get('uid')
+    memid = request.json.get('memid')
+
+    client = chromadb.PersistentClient(path="/mnt/chromadb/beezle_"+str(uid)+".db")
+    collection = client.get_collection(name='memories')
+    response = ollama.embeddings(model=EMBED_MODEL, prompt=summary)
+    embedding = response['embedding']
+    collection.add(
+        id=[memid],
+        embeddings=[embedding]
+    )
+
+@app.route('/companion/retrieve_memory', methods=['POST'])
+def retrieve_memories():
+    prompt = request.json.get('prompt')
+    username = request.json.get('username')
+    persona = request.json.get('persona')
+    response =ollama.embeddings(
+        prompt=prompt,
+        model=EMBED_MODEL
+    )
+    client = chromadb.PersistentClient(path="/mnt/chromadb/beezle.db")
+    collection = client.get_collection('memories'+'_'+username+'_'+persona)
+    results = collection.query(
+        query_embeddings = [response['embedding']],
+        n_results = 1
+    )
+    data = results['documents'][0][0]
+    return jsonify(data), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=21998)
