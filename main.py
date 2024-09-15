@@ -111,8 +111,8 @@ def embed_memories():
 
     print(uid)
     print(memid)
-    client = chromadb.PersistentClient(path="/mnt/chromadb/beezle_"+str(uid)+".db")
-    collection = client.get_collection(name='memories')
+    client = chromadb.PersistentClient(path="/mnt/beezledb/beezle_"+str(uid)+".db")
+    collection = client.get_or_create_collection(name='memories')
     response = ollama.embeddings(model=EMBED_MODEL, prompt=summary)
     embedding = response['embedding']
     collection.add(
@@ -124,14 +124,13 @@ def embed_memories():
 @app.route('/companion/retrieve_memory', methods=['POST'])
 def retrieve_memories():
     prompt = request.json.get('prompt')
-    username = request.json.get('username')
-    persona = request.json.get('persona')
+    uid = request.json.get('uid')
     response =ollama.embeddings(
         prompt=prompt,
         model=EMBED_MODEL
     )
-    client = chromadb.PersistentClient(path="/mnt/chromadb/beezle.db")
-    collection = client.get_collection('memories'+'_'+username+'_'+persona)
+    client = chromadb.PersistentClient(path="/mnt/beezledb/beezle_"+str(uid)+".db")
+    collection = client.get_collection(name='memories')
     results = collection.query(
         query_embeddings = [response['embedding']],
         n_results = 1
