@@ -21,7 +21,7 @@ CORS(app)
 
 mozTTS = moztts.MozTTS()
 
-EMBED_MODEL = "mxbai-embed-large"
+EMBED_MODEL = "nomic-embed-text:latest"
 @app.route('/')
 def index():
     return send_from_directory('html', 'index.html')
@@ -115,10 +115,16 @@ def embed_memories():
     collection = client.get_or_create_collection(name='memories')
     response = ollama.embeddings(model=EMBED_MODEL, prompt=summary)
     embedding = response['embedding']
+    print('embeddings : ',embedding)
+    if embedding is None:
+        print("empty embedding")
+        return jsonify("no embed"), 200
     collection.add(
-        id=[memid],
-        embeddings=[embedding]
+        ids=[str(memid)],
+        embeddings=[embedding],
+        documents=[str(memid)]
     )
+    return jsonify("ok"), 200
 
 
 @app.route('/companion/retrieve_memory', methods=['POST'])
