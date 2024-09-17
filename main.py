@@ -129,6 +129,7 @@ def embed_memories():
 
 @app.route('/companion/retrieve_memory', methods=['POST'])
 def retrieve_memories():
+    print("\nretrieving ...")
     prompt = request.json.get('prompt')
     uid = request.json.get('uid')
     response =ollama.embeddings(
@@ -141,8 +142,10 @@ def retrieve_memories():
         query_embeddings = [response['embedding']],
         n_results = 1
     )
+    print(results)
     data = results['documents'][0][0]
-    return jsonify(data), 200
+    print("retrieved!\n")
+    return jsonify({ 'id': int(data) } ), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=21998)
