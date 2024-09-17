@@ -3,3 +3,5 @@ datetime
 flask-cors
 BeautifulSoup4
 requests
+ollama
+chromadb
