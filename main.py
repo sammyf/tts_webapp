@@ -144,9 +144,12 @@ def retrieve_memories():
         n_results = 1
     )
     print(results)
-    data = results['documents'][0][0]
-    print("retrieved!\n")
-    return jsonify({ 'id': int(data) } ), 200
+
+    data=0
+    if len(results) > 0 and len(results['documents']) > 0 and len(results['documents'][0]) > 0:
+        data = results['documents'][0][0]
+        print("retrieved!\n")
+        return jsonify({ 'id': int(data) } ), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=21998)
