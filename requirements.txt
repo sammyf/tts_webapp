@@ -1,9 +1,10 @@
 torch
 tts
+pydantic<2.0a1
 flask
 datetime
 flask-cors
 BeautifulSoup4
 requests
 ollama
-chromadb
+chromadb==0.4.24
