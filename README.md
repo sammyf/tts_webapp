@@ -39,3 +39,7 @@ probably similar to GNU/Linux. No idea really as I don't have a Microsoft Window
 **MacOS**
 
 See Windows, except that I never had a Mac nor an Apple device.
+
+
+<a href="https://www.buymeacoffee.com/socialnetwooky" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
