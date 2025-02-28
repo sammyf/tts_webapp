@@ -10,7 +10,7 @@ import glob
 import json
 import ollama
 import chromadb
-
+import re
 from flask_cors import CORS
 from bs4 import BeautifulSoup
 import time
@@ -34,6 +34,7 @@ def return_wave_file(fn):
 
 @app.route('/generate', methods=['POST'])
 def generate_wave_file():
+    print("Simple Generate")
     text = request.form.get('txt')
     voice = request.form.get('voice')
 
@@ -48,15 +49,34 @@ def generate_wave_file():
 
 @app.route('/companion/tts/output/<fn>', methods=['GET'])
 def return_wave_file_beezle(fn):
-
     return send_file("voices/"+fn, mimetype='audio/x-wav')
 
 @app.route('/companion/tts/generate', methods=['POST'])
-def generate_wave_file_beezle():
+def generate_wave_file_multiplex():
+    voice = request.json.get('voice')
+    pattern = r"^p\d{3}$"
+
+    # Check if 'voice' matches the pattern
+    if re.match(pattern, voice):
+        print(f"TTS Voice found {voice}")
+        return generate_wave_file_beezle(request)
+    else:
+        # No match, call the Zonos API endpoint
+        print("Zonos Voice found")
+        response = requests.post('http://127.0.0.1:21999/generate', json=request.json)
+
+        purge_voices()
+        # Check if the request was successful
+        if response.status_code == 200:
+            return response.json()  # Return the JSON response from the API
+        else:
+            return {"error": "Failed to generate wave file"}, response.status_code
+
+
+def generate_wave_file_beezle(request):
     text = request.json.get('text')
     voice = request.json.get('voice')
 
-    purge_voices()
     # get current date and time
     now = datetime.datetime.now()
     fname = now.strftime("%Y%m%d%H%M%S%f") + "_"+voice+".wav"
@@ -77,7 +97,7 @@ def get_url_content():
         # Parse the web page content
         soup = BeautifulSoup(response.text, 'html.parser')
         linkList = ""
-        for a in soup.findAll('a'):
+        for a in soup.find_all('a'):
             link = urljoin(url, a.get('href'))
             a.string = " "+a.text + "(href: '" + link + "') "
         # Get textual part of the page
@@ -115,7 +135,7 @@ def embed_memories():
     collection = client.get_or_create_collection(name='memories')
     response = ollama.embeddings(model=EMBED_MODEL, prompt=summary, keep_alive=-1)
     embedding = response['embedding']
-    print('embeddings : ',embedding)
+    print('embedded')
     if embedding is None:
         print("empty embedding")
         return jsonify("no embed"), 200
@@ -150,6 +170,7 @@ def retrieve_memories():
         data = results['documents'][0][0]
         print("retrieved!\n")
         return jsonify({ 'id': int(data) } ), 200
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=21998)

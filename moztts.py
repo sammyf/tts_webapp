@@ -13,7 +13,11 @@ class MozTTS:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def load_model( self, model_name):
-        self.tts = TTS(model_name).to(self.device)
+        self.tts = TTS()
+        use_cuda = False
+        if self.device == "cuda":
+            use_cuda = True
+        self.tts.load_tts_model_by_name(model_name, use_cuda)
 
     def moztts(self, sentence, bot_speaker, outpath):
         if self.tts is None:
