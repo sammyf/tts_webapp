@@ -29,8 +29,12 @@ def index():
 
 @app.route('/output/<fn>', methods=['GET', 'POST'])
 def return_wave_file(fn):
-
     return send_file("voices/"+fn, mimetype='audio/x-wav')
+
+def removeThinking(text):
+    # Use regex to find all occurrences of <think>...</think> and replace them with an empty string
+    cleaned_text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
+    return cleaned_text
 
 @app.route('/generate', methods=['POST'])
 def generate_wave_file():
@@ -74,7 +78,7 @@ def generate_wave_file_multiplex():
 
 
 def generate_wave_file_beezle(request):
-    text = request.json.get('text')
+    text = removeThinking(request.json.get('text'))
     voice = request.json.get('voice')
 
     # get current date and time
